@@ -1,4 +1,5 @@
 using AzureAPI.Dao;
+using AzureAPI.Dao.IRepository;
 using AzureAPI.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ namespace AzureAPI
 
 
             //declare service for dependency injection
-            builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
             var app = builder.Build();
@@ -38,6 +39,7 @@ namespace AzureAPI
 
             app.UseAuthorization();
 
+            AppDbInitializer.Seed(app);
 
             app.MapControllers();
 
