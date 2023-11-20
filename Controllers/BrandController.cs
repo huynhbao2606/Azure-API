@@ -18,7 +18,7 @@ namespace AzureAPI.Controllers
 
         public BrandController(IUnitOfWork unitOfWork)
         {
-           
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/Brand
@@ -28,7 +28,9 @@ namespace AzureAPI.Controllers
             var brands = await _unitOfWork.ProductBrandRepository.GetAll();
 
             return Ok(brands);
+
         }
+
 
         // GET: api/Brand/5
         [HttpGet("{id}")]

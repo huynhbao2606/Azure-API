@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using AzureAPI.Dao;
 using AzureAPI.Dao.IRepository;
 using AzureAPI.DTO;
+using AutoMapper;
 
 namespace AzureAPI
 {
@@ -14,10 +15,12 @@ namespace AzureAPI
     public class ProductController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ProductController(IUnitOfWork unitOfWork)
+        public ProductController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
 
@@ -28,8 +31,10 @@ namespace AzureAPI
                 filter: null,
                 orderBy: null,
                 includeProperties: "ProductType,ProductBrand");
-    
-            return Ok(products);
+
+            var productDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
+
+            return Ok(productDto);
         }
 
         [HttpGet("{id}")]
@@ -42,17 +47,10 @@ namespace AzureAPI
 
             Product product = query.FirstOrDefault();
 
+            ProductDTO productdto = _mapper.Map<ProductDTO>(product);
 
-            return Ok(new ProductDTO
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                PictureUrl = product.PictureUrl,
-                Price = product.Price,
-                ProductBrand = product.ProductBrand.Name,
-                ProductType = product.ProductType.Name
-            });
+
+            return Ok(productdto);
         }
 
 

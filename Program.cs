@@ -2,6 +2,7 @@ using AzureAPI.Dao;
 using AzureAPI.Dao.IRepository;
 using AzureAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using AzureAPI.Middlewares;
 
 namespace AzureAPI
 {
@@ -22,11 +23,17 @@ namespace AzureAPI
             builder.Services.AddSwaggerGen();
 
 
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+
             //declare service for dependency injection
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
             var app = builder.Build();
+
+            app.UseMiddleware<SeverErrorExceptionMiddle>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -34,6 +41,7 @@ namespace AzureAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseStaticFiles();
 
             app.UseHttpsRedirection();
 

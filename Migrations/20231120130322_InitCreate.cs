@@ -25,7 +25,8 @@ namespace AzureAPI.Migrations
                 name: "ProductType",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -44,8 +45,7 @@ namespace AzureAPI.Migrations
                     Price = table.Column<decimal>(type: "decimal(38,2)", precision: 38, scale: 2, nullable: false),
                     PictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProductBrandId = table.Column<int>(type: "int", nullable: false),
-                    ProductTypeId = table.Column<int>(type: "int", nullable: false),
-                    ProductTypeId1 = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    ProductTypeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,21 +57,11 @@ namespace AzureAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Product_ProductType_ProductTypeId1",
-                        column: x => x.ProductTypeId1,
+                        name: "FK_Product_ProductType_ProductTypeId",
+                        column: x => x.ProductTypeId,
                         principalTable: "ProductType",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.InsertData(
-                table: "Product",
-                columns: new[] { "Id", "Description", "Name", "PictureUrl", "Price", "ProductBrandId", "ProductTypeId", "ProductTypeId1" },
-                values: new object[,]
-                {
-                    { 1, null, "Inactivated", null, 0m, 0, 0, null },
-                    { 2, null, "Live-attenuated", null, 0m, 0, 0, null },
-                    { 3, null, "Messenger RNA (mRNA)", null, 0m, 0, 0, null },
-                    { 4, null, "Subunit, recombinant, polysaccharide, and conjugate", null, 0m, 0, 0, null }
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -80,9 +70,9 @@ namespace AzureAPI.Migrations
                 column: "ProductBrandId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Product_ProductTypeId1",
+                name: "IX_Product_ProductTypeId",
                 table: "Product",
-                column: "ProductTypeId1");
+                column: "ProductTypeId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -48,50 +48,13 @@ namespace AzureAPI.Migrations
                     b.Property<int>("ProductTypeId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ProductTypeId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProductBrandId");
 
-                    b.HasIndex("ProductTypeId1");
+                    b.HasIndex("ProductTypeId");
 
                     b.ToTable("Product");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Inactivated",
-                            Price = 0m,
-                            ProductBrandId = 0,
-                            ProductTypeId = 0
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Live-attenuated",
-                            Price = 0m,
-                            ProductBrandId = 0,
-                            ProductTypeId = 0
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Messenger RNA (mRNA)",
-                            Price = 0m,
-                            ProductBrandId = 0,
-                            ProductTypeId = 0
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Subunit, recombinant, polysaccharide, and conjugate",
-                            Price = 0m,
-                            ProductBrandId = 0,
-                            ProductTypeId = 0
-                        });
                 });
 
             modelBuilder.Entity("AzureAPI.Entities.ProductBrand", b =>
@@ -112,8 +75,11 @@ namespace AzureAPI.Migrations
 
             modelBuilder.Entity("AzureAPI.Entities.ProductType", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -133,7 +99,9 @@ namespace AzureAPI.Migrations
 
                     b.HasOne("AzureAPI.Entities.ProductType", "ProductType")
                         .WithMany()
-                        .HasForeignKey("ProductTypeId1");
+                        .HasForeignKey("ProductTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ProductBrand");
 
