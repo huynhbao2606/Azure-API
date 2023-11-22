@@ -1,8 +1,11 @@
 using AzureAPI.Dao;
 using AzureAPI.Dao.IRepository;
 using AzureAPI.Data;
+using AzureAPI.Helper;
 using Microsoft.EntityFrameworkCore;
 using AzureAPI.Middlewares;
+using Microsoft.AspNetCore.Mvc;
+using AzureAPI.Exceptions;
 
 namespace AzureAPI
 {
@@ -23,6 +26,26 @@ namespace AzureAPI
             builder.Services.AddSwaggerGen();
 
 
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = actionContext =>
+                {
+                    var errors = actionContext.ModelState
+                    .Where(e => e.Value.Errors.Count > 0)
+                    .SelectMany(x => x.Value.Errors)
+                    .Select(x => x.ErrorMessage);
+
+                    var errorResponse = new ValidateInputErrorResponse(400)
+                    {
+                        Errors = errors
+                    };
+
+                    return new BadRequestObjectResult(errorResponse);
+
+                };
+            });
+
+
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
@@ -41,6 +64,9 @@ namespace AzureAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseStatusCodePagesWithReExecute("/errors/{0}");
+
             app.UseStaticFiles();
 
             app.UseHttpsRedirection();

@@ -7,6 +7,9 @@ using AzureAPI.Dao;
 using AzureAPI.Dao.IRepository;
 using AzureAPI.DTO;
 using AutoMapper;
+using System.Linq;
+using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AzureAPI
 {
@@ -25,11 +28,26 @@ namespace AzureAPI
 
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetProducts()
+        public async Task<ActionResult<List<Product>>> GetProducts(string sort,int? brandId,int? typeId)
         {
+
+            
+            Func<IQueryable<Product>, IOrderedQueryable<Product>> sortQuery = sort switch
+            {
+                "priceAsc" => p => p.OrderBy(i => i.Price),
+                "priceDesc" => p => p.OrderByDescending(i => i.Price),
+                "typeAsc" => p => p.OrderBy(i => i.ProductTypeId),
+                "typeDesc" => p => p.OrderByDescending(i => i.ProductTypeId),
+                "brandAsc" => p => p.OrderBy(i => i.ProductBrandId),
+                "brandDesc" => p => p.OrderByDescending(i => i.ProductBrandId),
+                _ => p => p.OrderBy(i => i.Name)
+            }; 
+
+
+
             IEnumerable<Product> products = await _unitOfWork.ProductRepository.GetEntities(
-                filter: null,
-                orderBy: null,
+                filter: x => (!typeId.HasValue || x.ProductTypeId == typeId) && (!brandId.HasValue || x.ProductBrandId == typeId),
+                orderBy: sortQuery,
                 includeProperties: "ProductType,ProductBrand");
 
             var productDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
