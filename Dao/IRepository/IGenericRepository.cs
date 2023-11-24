@@ -1,5 +1,6 @@
 ﻿using AzureAPI.Entities;
 using System.Linq.Expressions;
+using AzureAPI.Helper;
 
 namespace AzureAPI.Dao.IRepository
 {
@@ -9,9 +10,10 @@ namespace AzureAPI.Dao.IRepository
 
         Task<IEnumerable<T>> GetAll();
 
-        Task<IEnumerable<T>> GetEntities(Expression<Func<T, bool>> filter,
-                Func<IQueryable<T>, IOrderedQueryable<T>> orderBy,
-                string includeProperties);
+        Task<PagedList<T>> GetEntities(Expression<Func<T, bool>> filter = null,
+                Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+                string includeProperties = "",
+                PaginationParams pagination = null);
 
         void Add(T entity);
 

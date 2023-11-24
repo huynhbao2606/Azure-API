@@ -11,6 +11,7 @@ namespace AzureAPI.Dao
         private IGenericRepository<ProductType> _productTypeRepository;
         private IGenericRepository<ProductBrand> _productBrandRepository;
 
+
         public UnitOfWork(ApplicationDbContext dbContext)
         {
             _context = dbContext;

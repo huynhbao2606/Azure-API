@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using AzureAPI.Dao;
 using AzureAPI.Dao.IRepository;
 using AzureAPI.DTO;
+using AzureAPI.Helper;
 using AutoMapper;
 using System.Linq;
 using System.Linq.Expressions;
@@ -28,11 +29,25 @@ namespace AzureAPI
 
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetProducts(string sort,int? brandId,int? typeId)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts(
+            [FromQuery] ProductRequestParams productRequestParams,
+            [FromQuery] PaginationParams pagination)
         {
 
-            
-            Func<IQueryable<Product>, IOrderedQueryable<Product>> sortQuery = sort switch
+            var query = await _unitOfWork.ProductRepository.GetEntities(
+                filter: buildFilter(productRequestParams),
+                orderBy: buildSortQuery(productRequestParams),
+                includeProperties: "ProductType,ProductBrand",
+                pagination: pagination);
+
+            var productDto = _mapper.Map<IEnumerable<ProductDTO>>(query);
+
+            return Ok(productDto);
+        }
+
+        private Func<IQueryable<Product>, IOrderedQueryable<Product>> buildSortQuery(ProductRequestParams productRequestParams)
+        {
+            return productRequestParams.Sort switch //Sort
             {
                 "priceAsc" => p => p.OrderBy(i => i.Price),
                 "priceDesc" => p => p.OrderByDescending(i => i.Price),
@@ -41,18 +56,21 @@ namespace AzureAPI
                 "brandAsc" => p => p.OrderBy(i => i.ProductBrandId),
                 "brandDesc" => p => p.OrderByDescending(i => i.ProductBrandId),
                 _ => p => p.OrderBy(i => i.Name)
-            }; 
+            };
+        }
+        private Expression<Func<Product, bool>> buildFilter(ProductRequestParams productRequestParams)
+        {
 
+            int? brandId = productRequestParams.BrandId;
 
+            int? typeId = productRequestParams.TypeId;
 
-            IEnumerable<Product> products = await _unitOfWork.ProductRepository.GetEntities(
-                filter: x => (!typeId.HasValue || x.ProductTypeId == typeId) && (!brandId.HasValue || x.ProductBrandId == typeId),
-                orderBy: sortQuery,
-                includeProperties: "ProductType,ProductBrand");
+            string search = productRequestParams.Sreach;
 
-            var productDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
-
-            return Ok(productDto);
+            return x =>
+            (string.IsNullOrEmpty(search) || x.Name.ToLower().Contains(search)) && // search
+                (!typeId.HasValue || x.ProductTypeId == typeId) &&
+                (!brandId.HasValue || x.ProductBrandId == brandId); //Filter
         }
 
         [HttpGet("{id}")]
@@ -60,7 +78,6 @@ namespace AzureAPI
         {
             var query = await _unitOfWork.ProductRepository.GetEntities(
                 filter: i => i.Id == id,
-                orderBy: null,
                 includeProperties: "ProductType,ProductBrand");
 
             Product product = query.FirstOrDefault();

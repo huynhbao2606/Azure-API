@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using AzureAPI.Dao.IRepository;
 using AzureAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using AzureAPI.Helper;
 
 namespace AzureAPI.Dao
 {
@@ -28,9 +29,10 @@ namespace AzureAPI.Dao
             return await query.ToListAsync(); 
         }
 
-        public async Task<IEnumerable<T>> GetEntities(Expression<Func<T, bool>> filter,
-                Func<IQueryable<T>, IOrderedQueryable<T>> orderBy,
-                string includeProperties)
+        public async Task<PagedList<T>> GetEntities(Expression<Func<T, bool>> filter = null,
+                Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+                string includeProperties = "",
+                PaginationParams pagination = null)
         {
             IQueryable<T> query = dbSet;
 
@@ -55,10 +57,8 @@ namespace AzureAPI.Dao
             {
                 query = orderBy(query);
             }
- 
-            return await query.ToListAsync();
 
-
+            return await PagedList<T>.ToPagedList(query,pagination.PageNumber,pagination.PageSize);
         }
 
         public void Add(T entity)
