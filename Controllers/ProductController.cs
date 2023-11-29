@@ -65,7 +65,7 @@ namespace AzureAPI
 
             int? typeId = productRequestParams.TypeId;
 
-            string search = productRequestParams.Sreach;
+            string search = productRequestParams.Search;
 
             return x =>
             (string.IsNullOrEmpty(search) || x.Name.ToLower().Contains(search)) && // search

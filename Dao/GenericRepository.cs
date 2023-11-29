@@ -38,7 +38,7 @@ namespace AzureAPI.Dao
 
             if(filter != null)
             {
-                query.Where(filter);
+                query = query.Where(filter);
             }
             
 

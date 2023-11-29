@@ -45,7 +45,10 @@ namespace AzureAPI
                 };
             });
 
-
+            builder.Services.AddCors(p => p.AddPolicy("MyCors", build =>
+            {
+                build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+            }));
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
@@ -64,6 +67,7 @@ namespace AzureAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseCors("MyCors");
 
             app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
